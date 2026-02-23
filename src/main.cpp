@@ -38,15 +38,46 @@
  */
 
 #include <Servo.h>
+#include <Servo.h>
+
+const int trigPin = 9;
+const int echoPin = 10;
+const int servoPin = 6;
+
 Servo myServo;
+
 void setup() {
-    myServo.attach(9);
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
+    myServo.attach(servoPin);
+    Serial.begin(9600);
 }
+
 void loop() {
-    myServo.write(0);
-    delay(1000);
-    myServo.write(90);
-    delay(1000);
-    myServo.write(180);
-    delay(1000);
+
+    // 1. Send trigger pulse
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+
+    // 2. Measure echo time
+    long duration = pulseIn(echoPin, HIGH);
+
+    // 3. Calculate distance
+    int distance = duration * 0.034 / 2;
+
+    Serial.print("Distance: ");
+    Serial.println(distance);
+
+    // 4. Rotate servo if object is closer than 15 cm
+    if (distance < 15) {
+        myServo.write(90);   // Rotate to 90 degree
+    } else {
+        myServo.write(0);    // Return to 0 degree
+    }
+
+    delay(500);
 }
